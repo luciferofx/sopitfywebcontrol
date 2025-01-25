@@ -292,7 +292,7 @@
 
     document.getElementById('login-btn').onclick = () => {
       const clientId = '257fb998558241bfb491cf515f9fbb1c'; // Replace with your Spotify Client ID
-      const redirectUri = 'http://127.0.0.1:5500/support.html'; // Replace with your redirect URI
+      const redirectUri = 'https://luciferofx.github.io/sopitfywebcontrol/'; // Replace with your redirect URI
       const scopes = 'user-read-playback-state user-modify-playback-state user-library-read'; // Define your required scopes
       const authUrl = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
       window.location.href = authUrl;
