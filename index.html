@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Timer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/spotify-web-api-js/1.2.0/spotify-web-api.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 40px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    button {
+      background-color: #fff;
+      color: #121212;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    button:hover {
+      background-color: #f4f4f4;
+    }
+
+    button:active {
+      transform: translateY(2px);
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      font-size: 16px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 30px;
+      border: 2px solid #444;
+      margin-top: 20px;
+      background-color: #181818;
+      color: #fff;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #f4f4f4;
+    }
+
+    #search-results {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      width: 80%;
+      max-width: 400px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .search-result-item:hover {
+      background-color: #f4f4f4;
+      color: #121212;
+    }
+
+    .search-result-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 5px;
+      margin-right: 15px;
+    }
+
+    .search-result-item div {
+      flex-grow: 1;
+    }
+
+    .play-pause-btn {
+      background-color: #f4f4f4;
+      font-size: 24px;
+      padding: 15px 30px;
+      border-radius: 50px;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .play-pause-btn:hover {
+      background-color: #e1e1e1;
+    }
+
+    .play-pause-btn:active {
+      transform: translateY(2px);
+    }
+
+    .timeline {
+      width: 80%;
+      height: 5px;
+      background-color: #444;
+      margin-top: 20px;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      background-color: #f4f4f4;
+      border-radius: 5px;
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    #current-song {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    #current-time {
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    #album-image {
+      margin-top: 20px;
+      border-radius: 10px;
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    #artist-name {
+      font-size: 18px;
+      color: #ddd;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .volume-control {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .volume-slider {
+      width: 100%;
+      height: 8px;
+      background: #444;
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      background: #f4f4f4;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .account-info {
+      font-size: 18px;
+      color: #fff;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .account-info img {
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 10px;
+    }
+
+    .account-info p {
+      margin: 5px 0;
+    }
+
+    #logout-btn {
+      background-color: #e60000;
+      margin-top: 30px;
+      font-size: 18px;
+      padding: 15px 30px;
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #logout-btn:hover {
+      background-color: #f44336;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      input[type="text"], #search-results {
+        width: 100%;
+      }
+
+      .play-pause-btn, #logout-btn {
+        width: 80%;
+      }
+
+      .volume-slider {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Spotify Timer</h1>
+  <button id="login-btn">Login to Spotify</button>
+
+  <!-- Search Bar -->
+  <input type="text" id="search-bar" placeholder="Search for a song...">
+
+  <!-- Search Results -->
+  <div id="search-results"></div>
+
+  <p id="current-song">Current Song: Not playing</p>
+  <p id="current-time">Current Song Time: 0</p>
+  
+  <!-- Timeline for song progress -->
+  <div class="timeline">
+    <div id="timeline-progress" class="timeline-progress"></div>
+  </div>
+
+  <img id="album-image" class="album-image" style="display: none;">
+  <p id="artist-name" class="artist-name"></p>
+
+  <button id="play-pause-btn" class="play-pause-btn" style="display: none;">Play</button>
+
+  <!-- Volume Control -->
+  <div class="volume-control">
+    <label for="volume-slider">Volume</label>
+    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
+  </div>
+
+  <!-- Logout Button -->
+  <button id="logout-btn" style="display: none;">Logout</button>
+
+  <!-- Account Info Section -->
+  <button id="account-btn" style="display: none;">Account</button>
+  <div id="account-info" class="account-info" style="display: none;">
+    <img id="account-avatar" src="" alt="Account Avatar">
+    <p id="account-name"></p>
+    <p id="account-email"></p>
+  </div>
+
+  <script>
+    let spotifyApi = new SpotifyWebApi();
+    let accessToken = '';
+    let isPlaying = false;
+
+    document.getElementById('login-btn').onclick = () => {
+      const clientId = '257fb998558241bfb491cf515f9fbb1c'; // Replace with your Spotify Client ID
+      const redirectUri = 'http://127.0.0.1:5500/support.html'; // Replace with your redirect URI
+      const scopes = 'user-read-playback-state user-modify-playback-state user-library-read'; // Define your required scopes
+      const authUrl = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scopes}&redirect_uri=${redirectUri}`;
+      window.location.href = authUrl;
+    };
+
+    if (window.location.hash) {
+      const hash = window.location.hash.substring(1).split('&');
+      hash.forEach((e) => {
+        const pair = e.split('=');
+        if (pair[0] === 'access_token') {
+          accessToken = pair[1];
+          spotifyApi.setAccessToken(accessToken);
+          document.getElementById('login-btn').style.display = 'none';
+          document.getElementById('play-pause-btn').style.display = 'inline-block';
+          document.getElementById('logout-btn').style.display = 'inline-block';
+          document.getElementById('account-btn').style.display = 'inline-block';
+        }
+      });
+    }
+
+    document.getElementById('play-pause-btn').onclick = async () => {
+      if (isPlaying) {
+        await spotifyApi.pause();
+        document.getElementById('play-pause-btn').innerText = 'Play';
+        isPlaying = false;
+      } else {
+        await spotifyApi.play();
+        document.getElementById('play-pause-btn').innerText = 'Pause';
+        isPlaying = true;
+      }
+    };
+
+    document.getElementById('search-bar').addEventListener('input', async (event) => {
+      const query = event.target.value;
+      if (query.length > 2) {
+        const results = await spotifyApi.search(query, ['track'], { limit: 10 });
+        const tracks = results.tracks.items;
+        displaySearchResults(tracks);
+      } else {
+        document.getElementById('search-results').innerHTML = '';
+      }
+    });
+
+    function displaySearchResults(tracks) {
+      const resultsContainer = document.getElementById('search-results');
+      resultsContainer.innerHTML = '';
+
+      tracks.forEach((track) => {
+        const resultItem = document.createElement('div');
+        resultItem.classList.add('search-result-item');
+        resultItem.innerHTML = `
+          <img src="${track.album.images[2].url}" alt="${track.name}">
+          <div>
+            <strong>${track.name}</strong><br>
+            <span>${track.artists.map(artist => artist.name).join(', ')}</span>
+          </div>
+        `;
+        resultItem.onclick = () => playSelectedSong(track.uri);
+        resultsContainer.appendChild(resultItem);
+      });
+    }
+
+    async function playSelectedSong(uri) {
+      await spotifyApi.play({ uris: [uri] });
+      document.getElementById('play-pause-btn').innerText = 'Pause';
+      isPlaying = true;
+      startAutoSongDetection();
+    }
+
+    function startAutoSongDetection() {
+      setInterval(async () => {
+        try {
+          const playback = await spotifyApi.getMyCurrentPlayingTrack();
+          if (playback && playback.item) {
+            const songName = playback.item.name;
+            const artistName = playback.item.artists[0].name;
+            const albumImageUrl = playback.item.album.images[0].url;
+            const progress = playback.progress_ms / 1000;
+            const duration = playback.item.duration_ms / 1000;
+            const progressPercentage = (progress / duration) * 100;
+
+            document.getElementById('current-song').innerText = `Current Song: ${songName}`;
+            document.getElementById('current-time').innerText = `Current Song Time: ${Math.floor(progress)}s`;
+            document.getElementById('album-image').src = albumImageUrl;
+            document.getElementById('album-image').style.display = 'block';
+            document.getElementById('artist-name').innerText = `Artist: ${artistName}`;
+            document.getElementById('timeline-progress').style.width = `${progressPercentage}%`;
+          }
+        } catch (error) {
+          console.error('Error fetching current playback data:', error);
+        }
+      }, 1000);
+    }
+
+    document.getElementById('volume-slider').addEventListener('input', async (event) => {
+      const volume = event.target.value;
+      await spotifyApi.setVolume(volume);
+    });
+
+    document.getElementById('logout-btn').onclick = () => {
+      accessToken = '';
+      spotifyApi.setAccessToken(null);
+      document.getElementById('login-btn').style.display = 'inline-block';
+      document.getElementById('logout-btn').style.display = 'none';
+      document.getElementById('play-pause-btn').style.display = 'none';
+      document.getElementById('account-btn').style.display = 'none';
+      document.getElementById('account-info').style.display = 'none';
+      document.getElementById('search-bar').value = '';
+      document.getElementById('search-results').innerHTML = '';
+      document.getElementById('current-song').innerText = 'Not playing';
+      document.getElementById('current-time').innerText = 'Current Song Time: 0';
+      document.getElementById('album-image').style.display = 'none';
+      document.getElementById('artist-name').innerText = '';
+      document.getElementById('timeline-progress').style.width = '0%';
+    };
+
+    document.getElementById('account-btn').onclick = async () => {
+      try {
+        const userData = await spotifyApi.getMe();
+        document.getElementById('account-avatar').src = userData.images[0]?.url || 'default-avatar.jpg';
+        document.getElementById('account-name').innerText = `Name: ${userData.display_name}`;
+        document.getElementById('account-email').innerText = `Email: ${userData.email}`;
+        document.getElementById('account-info').style.display = 'block';
+      } catch (error) {
+        console.error('Error fetching account info:', error);
+      }
+    };
+  </script>
+</body>
+</html>
